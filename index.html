@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronograma · Cybersec + Concursos</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080c14; --bg2: #0d1220; --bg3: #111827;
+  --border: rgba(0,212,170,0.12); --border2: rgba(0,212,170,0.25);
+  --cyan: #00d4aa; --purple: #7c6df7;
+  --amber: #f59e0b; --red: #ef4444; --blue: #3b82f6;
+  --green: #4ade80;
+  --text: #e2e8f0; --text2: #94a3b8; --text3: #475569;
+  --mono: 'JetBrains Mono', monospace; --sans: 'IBM Plex Sans', sans-serif;
+  /* concurso colors */
+  --esa: #0F6E56; --bb: #185FA5; --prf: #854F0B;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 18px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+body::before { content:''; position:fixed; inset:0; background-image: repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0,212,170,0.02) 40px), repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0,212,170,0.02) 40px); pointer-events:none; z-index:0; }
+
+/* NAV */
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(8,12,20,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 1.5rem; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+.nav-logo { font-family: var(--mono); font-size: 12px; color: var(--cyan); letter-spacing: 0.05em; white-space: nowrap; }
+.nav-links { display: flex; gap: 1rem; list-style: none; align-items: center; flex-wrap: wrap; }
+.nav-links a { font-size: 11px; font-family: var(--mono); color: var(--text2); text-decoration: none; letter-spacing: 0.06em; transition: color 0.2s; }
+.nav-links a:hover { color: var(--cyan); }
+.nav-current-btn { font-family: var(--mono); font-size: 11px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: var(--cyan); cursor: pointer; letter-spacing: 0.04em; transition: all 0.2s; }
+.nav-current-btn:hover { background: var(--cyan); color: var(--bg); }
+
+/* BARRA PROGRESSO */
+#progress-bar { position: fixed; top: 56px; left: 0; right: 0; height: 3px; background: rgba(0,212,170,0.1); z-index: 99; }
+#progress-fill { height: 100%; width: 0%; background: var(--cyan); transition: width 0.4s ease; }
+
+/* HERO */
+.hero { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 6rem 2rem 4rem; max-width: 1100px; margin: 0 auto; }
+.hero-tag { font-family: var(--mono); font-size: 10px; color: var(--cyan); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px; }
+.hero-tag::before { content: ''; display: block; width: 20px; height: 1px; background: var(--cyan); }
+h1 { font-family: var(--mono); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1.5rem; color: var(--text); }
+h1 span { color: var(--cyan); }
+.hero-sub { font-size: 15px; color: var(--text2); max-width: 580px; margin-bottom: 3rem; line-height: 1.8; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; max-width: 800px; margin-bottom: 1rem; }
+.stat { background: var(--bg2); padding: 1rem 1.25rem; transition: background 0.2s; }
+.stat:hover { background: var(--bg3); }
+.stat-val { font-family: var(--mono); font-size: 1.4rem; font-weight: 700; color: var(--cyan); line-height: 1; margin-bottom: 3px; }
+.stat-val.esa-col { color: #5DCAA5; }
+.stat-val.bb-col { color: #60a5fa; }
+.stat-val.prf-col { color: var(--amber); }
+.stat-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; }
+.scroll-hint { margin-top: 3rem; font-family: var(--mono); font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 8px; animation: bounce 2s infinite; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(4px)} }
+
+/* SECTIONS */
+section { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 4rem 2rem; }
+.section-header { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 2rem; }
+.section-num { font-family: var(--mono); font-size: 11px; color: var(--cyan); letter-spacing: 0.1em; }
+h2 { font-family: var(--mono); font-size: 1.2rem; font-weight: 500; color: var(--text); }
+.section-line { flex: 1; height: 1px; background: var(--border); }
+
+/* ROTINA */
+.rotina-timeline { display: flex; flex-direction: column; }
+.rotina-item { display: grid; grid-template-columns: 130px 1fr; position: relative; }
+.rotina-time { font-family: var(--mono); font-size: 11px; color: var(--text3); padding: .85rem 1.25rem .85rem 0; text-align: right; line-height: 1.4; }
+.rotina-body { border-left: 1px solid var(--border); padding: .85rem 0 .85rem 1.25rem; display: flex; flex-direction: column; justify-content: center; position: relative; }
+.rotina-body::before { content: ''; position: absolute; left: -5px; top: 50%; transform: translateY(-50%); width: 9px; height: 9px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); }
+.rotina-item.active-cyber .rotina-body::before { background: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+.rotina-item.active-concurso .rotina-body::before { background: #5DCAA5; border-color: var(--esa); box-shadow: 0 0 8px rgba(15,110,86,0.5); }
+.rotina-item.active-facul .rotina-body::before { background: #60a5fa; border-color: var(--bb); box-shadow: 0 0 8px rgba(24,95,165,0.5); }
+.rotina-item.active-mat .rotina-body::before { background: var(--amber); border-color: var(--prf); box-shadow: 0 0 8px rgba(133,79,11,0.5); }
+.rotina-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.rotina-sub { font-size: 11px; color: var(--text2); }
+.rotina-dur { font-family: var(--mono); font-size: 10px; margin-top: 3px; }
+.dur-cyber { color: var(--cyan); }
+.dur-concurso { color: #5DCAA5; }
+.dur-facul { color: #60a5fa; }
+.dur-mat { color: var(--amber); }
+.rotina-pause .rotina-title { color: var(--text3); font-weight: 400; font-size: 13px; }
+.rotina-pause .rotina-body::before { border-color: var(--bg3); }
+.timer-btn { margin-top: 6px; align-self: flex-start; font-family: var(--mono); font-size: 10px; padding: 3px 10px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text3); cursor: pointer; transition: all 0.2s; }
+.timer-btn:hover { color: var(--cyan); border-color: var(--cyan); }
+.timer-btn.running { color: var(--cyan); border-color: var(--cyan); background: rgba(0,212,170,0.07); }
+.timer-btn.done { color: var(--green); border-color: var(--green); }
+.day-tabs { display: flex; gap: 6px; margin-bottom: 1.5rem; }
+.day-tab { font-family: var(--mono); font-size: 11px; padding: 5px 14px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; transition: all 0.2s; }
+.day-tab.active { background: var(--cyan); border-color: var(--cyan); color: var(--bg); font-weight: 700; }
+
+/* LEGEND ROTINA */
+.rotina-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.rl-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); font-family: var(--mono); }
+.rl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ALERTA URGENTE */
+.alert-urgent { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--text2); margin-bottom: 1.5rem; line-height: 1.6; }
+.alert-urgent strong { color: #f87171; }
+.alert-ok { background: rgba(0,212,170,0.06); border: 1px solid rgba(0,212,170,0.2); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--text2); margin-bottom: 1rem; line-height: 1.6; }
+.alert-ok strong { color: var(--cyan); }
+
+/* CONCURSOS SECTION */
+.concursos-targets { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin-bottom: 1.5rem; }
+.target-card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--bg2); }
+.target-card.urgente { border-color: rgba(15,110,86,0.4); }
+.tc-header { padding: .85rem 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.tc-badge { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 99px; font-weight: 700; flex-shrink: 0; }
+.badge-esa { background: rgba(15,110,86,0.2); color: #5DCAA5; border: 1px solid rgba(15,110,86,0.3); }
+.badge-bb  { background: rgba(24,95,165,0.15); color: #60a5fa; border: 1px solid rgba(24,95,165,0.3); }
+.badge-prf { background: rgba(133,79,11,0.15); color: var(--amber); border: 1px solid rgba(133,79,11,0.3); }
+.tc-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.tc-body { padding: .85rem 1rem; }
+.tc-date { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-bottom: 8px; }
+.tc-items { display: flex; flex-direction: column; gap: 3px; }
+.tc-item { font-size: 11px; color: var(--text2); padding-left: 10px; position: relative; }
+.tc-item::before { content: '·'; position: absolute; left: 2px; color: var(--cyan); }
+.tc-item.vantagem { color: #5DCAA5; }
+.tc-item.vantagem::before { color: #5DCAA5; }
+
+/* CONCURSO WEEKS */
+.conc-filter-wrap { display: flex; gap: 6px; margin-bottom: .75rem; flex-wrap: wrap; }
+.conc-filter-btn { font-family: var(--mono); font-size: 11px; padding: 4px 12px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text3); cursor: pointer; transition: all 0.15s; }
+.conc-filter-btn:hover { color: var(--text); border-color: var(--border2); }
+.conc-filter-btn.active { background: var(--bg3); color: var(--text); border-color: var(--border2); }
+.conc-weeks-grid { display: flex; flex-direction: column; gap: 4px; }
+.conc-card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; transition: border-color 0.2s; cursor: pointer; }
+.conc-card:hover { border-color: var(--border2); }
+.conc-card.open { border-color: var(--border2); }
+.conc-header { display: grid; grid-template-columns: 56px 1fr auto auto; align-items: center; gap: 10px; padding: 10px 14px; background: var(--bg2); user-select: none; transition: background 0.2s; }
+.conc-header:hover { background: var(--bg3); }
+.conc-num { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.conc-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.conc-date { font-family: var(--mono); font-size: 10px; color: var(--text3); white-space: nowrap; }
+.conc-chevron { width: 14px; height: 14px; color: var(--text3); transition: transform 0.2s; flex-shrink: 0; }
+.conc-card.open .conc-chevron { transform: rotate(180deg); }
+.conc-body { display: none; padding: 14px; background: var(--bg); border-top: 1px solid var(--border); gap: 14px; }
+.conc-card.open .conc-body { display: grid; grid-template-columns: 1fr 1fr; }
+@media (max-width: 600px) { .conc-card.open .conc-body { grid-template-columns: 1fr; } }
+.conc-col-title { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 7px; }
+.conc-topic { font-size: 12px; color: var(--text2); padding: 2px 0 2px 12px; position: relative; }
+.conc-topic::before { content: '›'; position: absolute; left: 0; color: #5DCAA5; }
+.conc-resource { font-size: 12px; color: var(--text2); padding: 2px 0 2px 12px; position: relative; }
+.conc-resource::before { content: '→'; position: absolute; left: 0; color: var(--amber); font-family: var(--mono); }
+.cyber-block { grid-column: 1 / -1; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 2px; }
+.cyber-tag { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 99px; background: rgba(0,212,170,0.1); color: var(--cyan); border: 1px solid rgba(0,212,170,0.25); margin-bottom: 5px; }
+.cyber-text { font-size: 11px; color: var(--text2); }
+
+/* PHASE BADGE CONCURSO */
+.phase-conc { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 99px; }
+.phase-esa { background: rgba(15,110,86,0.15); color: #5DCAA5; border: 1px solid rgba(15,110,86,0.3); }
+.phase-bb { background: rgba(24,95,165,0.12); color: #60a5fa; border: 1px solid rgba(24,95,165,0.3); }
+.phase-prf { background: rgba(133,79,11,0.12); color: var(--amber); border: 1px solid rgba(133,79,11,0.3); }
+
+/* WEEKS (CYBER) */
+.phase-pill { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 99px; letter-spacing: 0.05em; }
+.phase-1 { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+.phase-2 { background: rgba(0,212,170,0.1); color: var(--cyan); border: 1px solid rgba(0,212,170,0.25); }
+.phase-3 { background: rgba(245,158,11,0.1); color: var(--amber); border: 1px solid rgba(245,158,11,0.25); }
+.phase-4 { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
+.weeks-grid { display: flex; flex-direction: column; gap: 4px; }
+.week-card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; transition: border-color 0.2s; }
+.week-card:hover { border-color: var(--border2); }
+.week-card.open { border-color: var(--border2); }
+.week-card.current-week { border-color: var(--cyan) !important; box-shadow: 0 0 18px rgba(0,212,170,0.12); }
+.week-card.completed .week-title-label { text-decoration: line-through; opacity: 0.5; }
+.week-check { width: 15px; height: 15px; accent-color: var(--cyan); cursor: pointer; flex-shrink: 0; }
+.current-badge { font-family: var(--mono); font-size: 10px; background: var(--cyan); color: var(--bg); padding: 2px 8px; border-radius: 99px; display: inline-block; margin-bottom: 3px; }
+.week-header { display: grid; grid-template-columns: 24px 56px 1fr auto auto; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; background: var(--bg2); user-select: none; transition: background 0.2s; }
+.week-header:hover { background: var(--bg3); }
+.week-num-label { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.week-title-label { font-size: 13px; font-weight: 500; color: var(--text); }
+.week-date-label { font-family: var(--mono); font-size: 10px; color: var(--text3); white-space: nowrap; }
+.week-chevron { width: 14px; height: 14px; color: var(--text3); transition: transform 0.2s; flex-shrink: 0; }
+.week-card.open .week-chevron { transform: rotate(180deg); }
+.week-body { display: none; padding: 14px; background: var(--bg); border-top: 1px solid var(--border); gap: 14px; }
+.week-card.open .week-body { display: grid; grid-template-columns: 1fr 1fr; }
+@media (max-width: 600px) { .week-card.open .week-body { grid-template-columns: 1fr; } }
+.week-col-title { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 7px; }
+.week-topic { font-size: 12px; color: var(--text2); padding: 2px 0 2px 12px; position: relative; }
+.week-topic::before { content: '›'; position: absolute; left: 0; color: var(--cyan); }
+.week-resource { font-size: 12px; color: var(--text2); padding: 2px 0 2px 12px; position: relative; }
+.week-resource::before { content: '→'; position: absolute; left: 0; color: var(--purple); font-family: var(--mono); }
+.facul-block { grid-column: 1 / -1; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 2px; }
+.facul-tag { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 99px; background: rgba(124,109,247,0.15); color: var(--purple); border: 1px solid rgba(124,109,247,0.3); margin-bottom: 5px; }
+.facul-text { font-size: 11px; color: var(--text2); }
+
+/* SEARCH */
+.search-wrap { position: relative; margin-bottom: .85rem; }
+.search-input { width: 100%; padding: 9px 14px 9px 36px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--mono); font-size: 12px; outline: none; transition: border-color 0.2s; }
+.search-input:focus { border-color: var(--border2); }
+.search-input::placeholder { color: var(--text3); }
+.search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 14px; pointer-events: none; }
+.no-result { text-align: center; color: var(--text3); padding: 2rem; font-family: var(--mono); font-size: 12px; }
+.phase-legend { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.25rem; }
+.filter-wrap { display: flex; gap: 5px; margin-bottom: .75rem; flex-wrap: wrap; }
+.filter-btn { font-family: var(--mono); font-size: 11px; padding: 4px 12px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text3); cursor: pointer; transition: all 0.15s; }
+.filter-btn:hover { color: var(--text); border-color: var(--border2); }
+.filter-btn.active { background: var(--bg3); color: var(--text); border-color: var(--border2); }
+
+/* DISCIPLINAS */
+.disc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; }
+.disc-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg2); transition: border-color 0.2s, transform 0.2s; }
+.disc-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.disc-header-bar { padding: .85rem 1.1rem; border-bottom: 1px solid var(--border); }
+.disc-name { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+.disc-meta { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-bottom: 7px; }
+.progress-bar-bg { height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.progress-bar { height: 100%; border-radius: 99px; transition: width 1s ease; }
+.disc-body { padding: .85rem 1.1rem; }
+.disc-align { font-size: 11px; color: var(--text2); line-height: 1.7; margin-bottom: 8px; }
+.disc-dica { font-size: 11px; color: var(--text3); padding: 2px 0 2px 12px; position: relative; }
+.disc-dica::before { content: '·'; position: absolute; left: 4px; color: var(--cyan); }
+
+/* TECHGUIDE */
+.levels-wrap { display: flex; flex-direction: column; gap: 14px; }
+.level-block { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.level-header-bar { padding: .85rem 1.1rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+.level-num { font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 6px; letter-spacing: 0.08em; }
+.level-name { font-size: 14px; font-weight: 500; }
+.level-count { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-left: auto; }
+.level-topics { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); background: var(--bg); }
+.level-group { padding: .85rem 1.1rem; }
+.level-group-name { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 7px; }
+.level-topic { font-size: 11px; color: var(--text2); padding: 2px 0 2px 12px; position: relative; }
+.level-topic::before { content: '›'; position: absolute; left: 0; }
+
+/* FOOTER */
+footer { position: relative; z-index: 1; border-top: 1px solid var(--border); padding: 2rem; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--text3); }
+footer span { color: var(--cyan); }
+
+/* ANIMATIONS */
+.fade-in { opacity: 0; transform: translateY(14px); transition: opacity 0.5s ease, transform 0.5s ease; }
+.fade-in.visible { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo" id="nav-logo">// cybersec + concursos · 2026</div>
+  <ul class="nav-links">
+    <li><a href="#rotina">rotina</a></li>
+    <li><a href="#concursos">concursos</a></li>
+    <li><a href="#semanas">cybersec</a></li>
+    <li><a href="#faculdade">faculdade</a></li>
+    <li><a href="#techguide">techguide</a></li>
+    <li><button class="nav-current-btn" onclick="scrollToCurrentWeek()">▶ semana atual</button></li>
+  </ul>
+</nav>
+
+<div id="progress-bar"><div id="progress-fill"></div></div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">Blue Team · Concursos · 2026</div>
+  <h1>Plano completo<br><span>Cybersec + ESA + BB + PRF</span></h1>
+  <p class="hero-sub">Cybersegurança Blue Team em ritmo contínuo, concursos em foco estratégico e faculdade mantida — tudo organizado em torno da sua rotina real.</p>
+  <div class="stats-grid">
+    <div class="stat"><div class="stat-val">18</div><div class="stat-label">Sem. Cybersec</div></div>
+    <div class="stat"><div class="stat-val esa-col">~2m</div><div class="stat-label">para ESA</div></div>
+    <div class="stat"><div class="stat-val bb-col">BB</div><div class="stat-label">após ESA</div></div>
+    <div class="stat"><div class="stat-val prf-col">PRF</div><div class="stat-label">meta carreira</div></div>
+    <div class="stat"><div class="stat-val">5h+</div><div class="stat-label">por dia</div></div>
+    <div class="stat"><div class="stat-val">ago/26</div><div class="stat-label">conclusão</div></div>
+  </div>
+  <div class="scroll-hint">↓ &nbsp;role para explorar</div>
+</div>
+
+<!-- ══════════════════════════════════
+     01 · ROTINA
+═══════════════════════════════════ -->
+<section id="rotina">
+  <div class="section-header fade-in">
+    <span class="section-num">01</span>
+    <h2>Rotina Diária</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="alert-urgent fade-in">
+    <strong>Fase 1 ativa — ESA em julho.</strong> A rotina abaixo prioriza concurso de manhã e à noite, mantendo cybersec reduzido mas contínuo (não zera). Após a ESA, a rotina volta ao foco total em cybersec.
+  </div>
+
+  <div class="rotina-legend fade-in">
+    <div class="rl-item"><div class="rl-dot" style="background:#5DCAA5"></div>Concurso</div>
+    <div class="rl-item"><div class="rl-dot" style="background:var(--cyan)"></div>Cybersec</div>
+    <div class="rl-item"><div class="rl-dot" style="background:#60a5fa"></div>Faculdade</div>
+    <div class="rl-item"><div class="rl-dot" style="background:var(--amber)"></div>Matemática</div>
+  </div>
+
+  <div class="day-tabs fade-in">
+    <button class="day-tab active" onclick="showDay('semana')">Seg – Sex</button>
+    <button class="day-tab" onclick="showDay('sabado')">Sábado</button>
+    <button class="day-tab" onclick="showDay('domingo')">Domingo</button>
+  </div>
+
+  <div id="day-semana" class="rotina-timeline fade-in">
+    <div class="rotina-item active-concurso">
+      <div class="rotina-time">04:30<br>05:30</div>
+      <div class="rotina-body">
+        <div class="rotina-title">Concurso — matéria principal</div>
+        <div class="rotina-sub">Matemática · Português · Raciocínio lógico · Inglês (rotação diária)</div>
+        <div class="rotina-dur dur-concurso">1h · prioridade #1</div>
+        <button class="timer-btn" onclick="startTimer(this,60)">▶ iniciar · 1h</button>
+      </div>
+    </div>
+    <div class="rotina-item active-cyber">
+      <div class="rotina-time">05:30<br>06:00</div>
+      <div class="rotina-body">
+        <div class="rotina-title">Cybersec — conteúdo novo</div>
+        <div class="rotina-sub">TechGuide: teoria ou vídeo-aula — ritmo reduzido mas contínuo</div>
+        <div class="rotina-dur dur-cyber">30 min · mantém o fio</div>
+        <button class="timer-btn" onclick="startTimer(this,30)">▶ iniciar · 30min</button>
+      </div>
+    </div>
+    <div class="rotina-item rotina-pause">
+      <div class="rotina-time">06:00<br>15:30</div>
+      <div class="rotina-body"><div class="rotina-title">Trabalho</div></div>
+    </div>
+    <div class="rotina-item rotina-pause">
+      <div class="rotina-time">15:30<br>16:00</div>
+      <div class="rotina-body">
+        <div class="rotina-title">Chegada + descanso</div>
+        <div class="rotina-sub">Comer, relaxar — transição obrigatória</div>
+      </div>
+    </div>
+    <div class="rotina-item active-facul">
+      <div class="rotina-time">16:00<br>17:00</div>
+      <div class="rotina-body">
+        <div class="rotina-title">Faculdade EaD</div>
+        <div class="rotina-sub">Aulas, exercícios e projetos da grade curricular</div>
+        <div class="rotina-dur dur-facul">1h · tarde</div>
+        <button class="timer-btn" onclick="startTimer(this,60)">▶ iniciar · 1h</button>
+      </div>
+    </div>
+    <div class="rotina-item active-concurso">
+      <div class="rotina-time">17:00<br>17:45</div>
+      <div class="rotina-body">
+        <div class="rotina-title">Concurso — questões cronometradas</div>
+        <div class="rotina-sub">Raciocínio lógico · simulação de prova · erros viram estudo da próxima semana</div>
+        <div class="rotina-dur dur-concurso">45 min</div>
+        <button class="timer-btn" onclick="startTimer(this,45)">▶ iniciar · 45min</button>
+      </div>
+    </div>
+    <div class="rotina-item rotina-pause">
+      <div class="rotina-time">17:45<br>19:00</div>
+      <div class="rotina-body"><div class="rotina-title">Jantar + descanso real</div><div class="rotina-sub">Sem telas de estudo — recuperação mental</div></div>
+    </div>
+    <div class="rotina-item active-concurso">
+      <div class="rotina-time">19:00<br>20:15</div>
+      <div class="rotina-body">
+        <div class="rotina-title">Concurso — matéria secundária</div>
+        <div class="rotina-sub">História · Geografia · Inglês · Redação (ESA) — ou revisão das questões erradas</div>
+        <div class="rotina-dur dur-concurso">1h15</div>
+        <button class="timer-btn" onclick="startTimer(this,75)">▶ iniciar · 1h15</button>
+      </div>
+    </div>
+    <div class="rotina-item active-cyber">
+      <div class="rotina-time">20:15<br>21:00</div>
+      <div class="rotina-body">
+        <div class="rotina-title">Cybersec — revisão leve</div>
+        <div class="rotina-sub">Flashcards, Anki, artigos curtos — sem conteúdo novo pesado</div>
+        <div class="rotina-dur dur-cyber">45 min</div>
+        <button class="timer-btn" onclick="startTimer(this,45)">▶ iniciar · 45min</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="day-sabado" class="rotina-timeline fade-in" style="display:none;">
+    <div class="rotina-item active-concurso">
+      <div class="rotina-time">09:00<br>11:00</div>
+      <div class="rotina-body">
+        <div class="rotina-title">Simulado completo da ESA</div>
+        <div class="rotina-sub">Prova cronometrada — corrija os erros, eles definem o estudo da semana seguinte</div>
+        <div class="rotina-dur dur-concurso">2h · prova real</div>
+        <button class="timer-btn" onclick="startTimer(this,120)">▶ iniciar · 2h</button>
+      </div>
+    </div>
+    <div class="rotina-item active-cyber">
+      <div class="rotina-time">11:00<br>12:30</div>
+      <div class="rotina-body">
+        <div class="rotina-title">Cybersec — prática livre + labs</div>
+        <div class="rotina-sub">TryHackMe, terminal, Wireshark, CTF — sem pressão, foco no prazer de aprender</div>
+        <div class="rotina-dur dur-cyber">1h30</div>
+        <button class="timer-btn" onclick="startTimer(this,90)">▶ iniciar · 1h30</button>
+      </div>
+    </div>
+    <div class="rotina-item active-facul">
+      <div class="rotina-time">12:30<br>13:30</div>
+      <div class="rotina-body">
+        <div class="rotina-title">Faculdade — fechar pendências</div>
+        <div class="rotina-sub">Atividades e projetos pendentes da semana</div>
+        <div class="rotina-dur dur-facul">1h</div>
+        <button class="timer-btn" onclick="startTimer(this,60)">▶ iniciar · 1h</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="day-domingo" class="rotina-timeline fade-in" style="display:none;">
+    <div class="rotina-item rotina-pause">
+      <div class="rotina-time">dia todo</div>
+      <div class="rotina-body">
+        <div class="rotina-title">Descanso — obrigatório</div>
+        <div class="rotina-sub">Não estude. A consolidação acontece durante o descanso. Respeite isso.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     02 · CONCURSOS
+═══════════════════════════════════ -->
+<section id="concursos">
+  <div class="section-header fade-in">
+    <span class="section-num">02</span>
+    <h2>Concursos — ESA · BB · PRF</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="concursos-targets fade-in">
+    <div class="target-card urgente">
+      <div class="tc-header">
+        <span class="tc-badge badge-esa">ESA</span>
+        <div class="tc-title">Escola de Sargentos das Armas</div>
+      </div>
+      <div class="tc-body">
+        <div class="tc-date">⚡ julho 2026 · prioridade máxima agora</div>
+        <div class="tc-items">
+          <div class="tc-item">Matemática — maior peso</div>
+          <div class="tc-item">Português — interpretação e gramática</div>
+          <div class="tc-item">Raciocínio lógico</div>
+          <div class="tc-item">Inglês — específico da ESA</div>
+          <div class="tc-item">História do Brasil e Geral</div>
+          <div class="tc-item">Geografia</div>
+          <div class="tc-item">Redação</div>
+          <div class="tc-item vantagem">Informática — já dominada pelo cybersec</div>
+        </div>
+      </div>
+    </div>
+    <div class="target-card">
+      <div class="tc-header">
+        <span class="tc-badge badge-bb">BB</span>
+        <div class="tc-title">Banco do Brasil</div>
+      </div>
+      <div class="tc-body">
+        <div class="tc-date">após ESA · edital a confirmar</div>
+        <div class="tc-items">
+          <div class="tc-item">Matemática + Raciocínio lógico</div>
+          <div class="tc-item">Português</div>
+          <div class="tc-item">Conhecimentos bancários</div>
+          <div class="tc-item">Mercado financeiro</div>
+          <div class="tc-item">Atualidades (15min/dia)</div>
+          <div class="tc-item vantagem">Informática — vantagem total via cybersec</div>
+          <div class="tc-item vantagem">Segurança da informação — domínio completo</div>
+        </div>
+      </div>
+    </div>
+    <div class="target-card">
+      <div class="tc-header">
+        <span class="tc-badge badge-prf">PRF</span>
+        <div class="tc-title">Polícia Rodoviária Federal</div>
+      </div>
+      <div class="tc-body">
+        <div class="tc-date">meta de carreira · preparação contínua</div>
+        <div class="tc-items">
+          <div class="tc-item">Matemática + Raciocínio lógico</div>
+          <div class="tc-item">Português</div>
+          <div class="tc-item">Dir. Constitucional + Administrativo</div>
+          <div class="tc-item">Legislação de Trânsito (CTB)</div>
+          <div class="tc-item">Geografia do Brasil</div>
+          <div class="tc-item vantagem">Informática + Redes — vantagem enorme</div>
+          <div class="tc-item vantagem">Forense digital — diferencial de carreira</div>
+          <div class="tc-item vantagem">OSINT e análise de dados — PRF investe nisso</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert-ok fade-in">
+    <strong>Matemática, Português e Raciocínio Lógico</strong> são cobrados nos três concursos. Estudar uma vez vale para todos. Informática é praticamente resolvida pelo seu histórico em cybersec.
+  </div>
+
+  <div style="font-size:11px;font-family:var(--mono);color:var(--text3);letter-spacing:0.08em;margin-bottom:.75rem;" class="fade-in">PLANO SEMANAL ESA — 8 semanas até julho</div>
+
+  <div class="conc-filter-wrap fade-in">
+    <button class="conc-filter-btn active" onclick="filterConc('all',this)">Todas</button>
+    <button class="conc-filter-btn" onclick="filterConc('esa',this)">ESA</button>
+    <button class="conc-filter-btn" onclick="filterConc('bb',this)">BB/PRF base</button>
+  </div>
+
+  <div class="conc-weeks-grid fade-in" id="conc-grid"></div>
+</section>
+
+<!-- ══════════════════════════════════
+     03 · CYBERSEC 18 SEMANAS
+═══════════════════════════════════ -->
+<section id="semanas">
+  <div class="section-header fade-in">
+    <span class="section-num">03</span>
+    <h2>Cybersec — 18 Semanas</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="alert-ok fade-in">
+    <strong>Ritmo reduzido durante a Fase 1</strong> (até julho): 30min manhã + 45min noite nos dias de semana, 1h30 no sábado. Após a ESA, retoma foco total. O progresso é marcado pelos checkboxes abaixo — não perca o fio.
+  </div>
+
+  <div class="phase-legend fade-in">
+    <span class="phase-pill phase-1">● Fase 1 — Base técnica (1–4)</span>
+    <span class="phase-pill phase-2">● Fase 2 — Segurança base (5–8)</span>
+    <span class="phase-pill phase-3">● Fase 3 — Blue Team (9–14)</span>
+    <span class="phase-pill phase-4">● Fase 4 — Avançado (15–18)</span>
+  </div>
+  <div class="filter-wrap fade-in">
+    <button class="filter-btn active" onclick="filterWeeks('all',this)">Todas</button>
+    <button class="filter-btn" onclick="filterWeeks('1',this)">Fase 1</button>
+    <button class="filter-btn" onclick="filterWeeks('2',this)">Fase 2</button>
+    <button class="filter-btn" onclick="filterWeeks('3',this)">Fase 3</button>
+    <button class="filter-btn" onclick="filterWeeks('4',this)">Fase 4</button>
+  </div>
+  <div class="search-wrap fade-in">
+    <span class="search-icon">⌕</span>
+    <input class="search-input" id="search-input" type="text" placeholder="buscar tópico, ferramenta ou conceito..." oninput="searchWeeks(this.value)">
+  </div>
+  <div class="weeks-grid" id="weeks-grid"></div>
+  <div class="no-result" id="no-result" style="display:none;"></div>
+</section>
+
+<!-- ══════════════════════════════════
+     04 · FACULDADE
+═══════════════════════════════════ -->
+<section id="faculdade">
+  <div class="section-header fade-in">
+    <span class="section-num">04</span>
+    <h2>Grade Curricular</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="disc-grid fade-in" id="disc-grid"></div>
+</section>
+
+<!-- ══════════════════════════════════
+     05 · TECHGUIDE
+═══════════════════════════════════ -->
+<section id="techguide">
+  <div class="section-header fade-in">
+    <span class="section-num">05</span>
+    <h2>TechGuide · Níveis</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="levels-wrap fade-in" id="levels-wrap"></div>
+</section>
+
+<footer>
+  <span>// cybersec blue team · esa · bb · prf</span> &nbsp;·&nbsp; 27 abr → 28 ago 2026 &nbsp;·&nbsp; 18 semanas · 531h
+</footer>
+
+<script>
+// ─── DADOS CONCURSO ───────────────────────────────────
+const concWeeks = [
+  { n:1, tag:'esa', date:"04/05 – 09/05", tema:"Matemática — base sólida",
+    topics:["Porcentagem e juros simples","Razão e proporção","Regra de três simples e composta","Frações e operações básicas","Exercícios cronometrados de fixação"],
+    resources:["Prof. Ferretto — YouTube (grátis)","QConcursos — filtrar por ESA","Gran Cursos — matemática para concursos","Estratégia Concursos — YouTube"],
+    cyber:"Cybersec: Linux fundamentos (ritmo reduzido) — comandos básicos, permissões" },
+  { n:2, tag:'esa', date:"11/05 – 16/05", tema:"Matemática + Raciocínio Lógico",
+    topics:["Geometria plana: área, perímetro","Grandezas proporcionais","Raciocínio lógico: proposições (V/F)","Conectivos lógicos: E, OU, SE-ENTÃO","Negação e equivalências"],
+    resources:["Estratégia Concursos — lógica","QConcursos — questões ESA anteriores","Prof. Ferretto — geometria","Gran Cursos — raciocínio lógico"],
+    cyber:"Cybersec: Redes fundamentos — modelo OSI, TCP/IP (matemática de redes se conecta aqui)" },
+  { n:3, tag:'esa', date:"18/05 – 23/05", tema:"Português + Inglês",
+    topics:["Interpretação de texto — ESA cobra bastante","Classes gramaticais: substantivo, adjetivo, verbo","Inglês: tempos verbais (present, past, future)","Inglês: vocabulário técnico e de contexto","Inglês: leitura e interpretação de texto"],
+    resources:["Professora Flávia Rita — YouTube","Prof. Noslen — gramática","English in Use — gramática inglesa","QConcursos — questões de inglês ESA"],
+    cyber:"Cybersec: Sub-redes e HTTP — cálculo CIDR conecta com matemática" },
+  { n:4, tag:'esa', date:"25/05 – 30/05", tema:"História do Brasil",
+    topics:["Brasil Colonial: séculos XVI-XVIII","Independência e Império","República Velha e Era Vargas","República Democrática (1945-1964)","Ditadura Militar e redemocratização"],
+    resources:["Brasil Escola — história resumida","Prof. Fabio Vieira — YouTube","QConcursos — história ESA","Manual do Candidato ESA — história"],
+    cyber:"Cybersec: CIA Triad e frameworks de segurança (Fase 2 começa)" },
+  { n:5, tag:'bb', date:"01/06 – 06/06", tema:"Geografia + Matemática avançada",
+    topics:["Regiões do Brasil: características gerais","Clima, vegetação e relevo","Geopolítica brasileira básica","Matemática: progressões aritméticas","Sequências e funções — cobrado no BB também"],
+    resources:["Geographia — YouTube","Prof. Ferretto — progressões","QConcursos — geografia","Estratégia Concursos — matemática avançada"],
+    cyber:"Cybersec: Gestão de riscos, IAM e LGPD — conecta com direito para PRF" },
+  { n:6, tag:'esa', date:"08/06 – 13/06", tema:"Redação + Revisão geral",
+    topics:["Estrutura da redação dissertativa","Introdução com tese clara","Desenvolvimento com argumentos","Conclusão propositiva","Revisão ortográfica e coesão"],
+    resources:["Descomplica — redação para concursos","Curso Redação ESA — YouTube","Correção de redações anteriores da ESA","Escreva 1 redação por semana este mês"],
+    cyber:"Cybersec: Criptografia + autenticação (matéria prática, não exige muito foco)" },
+  { n:7, tag:'esa', date:"15/06 – 20/06", tema:"Simulado + pontos fracos",
+    topics:["Simulado completo ESA 2024 (prova oficial)","Análise dos erros por matéria","Revisão focada nos 3 temas mais errados","Raciocínio lógico — reforço","Inglês — pontos gramaticais difíceis"],
+    resources:["Site do Exército — provas anteriores","QConcursos — simulado ESA","Revisão pelos erros do simulado anterior","Estratégia de prova: tempo por questão"],
+    cyber:"Cybersec: Firewalls, IDS e IPS — leitura leve, sem lab pesado" },
+  { n:8, tag:'esa', date:"22/06 – 27/06", tema:"Semana final — revisão e estratégia",
+    topics:["Revisão rápida de todas as matérias","Simulado final cronometrado","Estratégia de prova: o que fazer se travar","Descanso mental nos 2 dias antes","Não estude no dia anterior — só revise anotações"],
+    resources:["Todas as anotações da semana 1-7","Simulado final — QConcursos","Mente descansada = melhor desempenho","Dorme bem, come bem, hidrata"],
+    cyber:"Cybersec: pausa total durante a semana de prova — retoma forte logo depois" }
+];
+
+const weeks = [
+  { n:1, phase:1, date:"27/04 – 02/05", tema:"Linux — Fundamentos + CLI", cyber:["Sistema de diretórios Linux","Comandos: ls, cd, pwd, mkdir, touch, rm, cp, mv","Permissões: chmod, chown","Compactar: tar, gzip","Editar arquivos com VI/nano"], resources:["Ninja do Linux — Comandos básicos (YouTube)","Alura: Linux Onboarding — CLI rápida e prática","MIT: The Missing Semester of Your CS Education","OverTheWire: Bandit (prática)"], facul:"Arquitetura de Computadores (aulas 4–5: Representação de Dados)" },
+  { n:2, phase:1, date:"04/05 – 09/05", tema:"Linux Intermediário + Python básico", cyber:["Processos: ps, top, kill","Usuários, grupos, variáveis de ambiente PATH","SSH e SCP: comunicação remota","Bash scripting e automação básica","Python: tipos, variáveis, condicionais, loops"], resources:["Alura: Linux Onboarding — usuários e permissões","Artigo: SSH, o acesso remoto (Alura)","Alura: Python — crie a sua primeira aplicação","Documentação Python oficial"], facul:"Arquitetura de Computadores (aulas 6–7) + Entrega e Suporte em TI (aulas 1–2)" },
+  { n:3, phase:1, date:"11/05 – 16/05", tema:"Redes de Computadores + TCP/IP", cyber:["Modelo OSI: 7 camadas na prática","TCP/IP, DNS, DHCP, ARP, ICMP","Diferenças: hub, switch, roteador","Wireshark: captura e análise de pacotes","Endereçamento IPv4"], resources:["AWS: O que são redes de computadores?","Artigo: O protocolo TCP/IP (Medium)","YouTube: Rede de Computadores — Animação 3D","Cisco NetAcad: Introduction to Networks (grátis)"], facul:"Arquitetura de Computadores (aulas 8–9, finalizar) + Entrega e Suporte em TI (aulas 3–4)" },
+  { n:4, phase:1, date:"18/05 – 23/05", tema:"Sub-redes + HTTP + Cloud fundamentos", cyber:["Cálculo CIDR e máscaras de sub-rede","HTTP: GET, POST, PUT, DELETE, status codes","HTTPS e TLS/SSL básico","IaaS, PaaS, SaaS: AWS, Azure, GCP"], resources:["Alura: Como calcular máscaras de sub-rede","MDN Web Docs: Uma visão geral do HTTP","Alura: Diferença entre HTTP e HTTPS","YouTube: AWS — O que é a AWS?"], facul:"Entrega e Suporte em TI (aulas 5–6, finalizar) + Gerenciamento de Projetos (aulas 1–2)" },
+  { n:5, phase:2, date:"25/05 – 30/05", tema:"CIA Triad + Framework de Cibersegurança", cyber:["CIA: Confidencialidade, Integridade, Disponibilidade","NIST Cybersecurity Framework","ISO 27001 e SOC2: visão geral","Conscientização de segurança: fator humano"], resources:["Site NIST Cybersecurity Framework","YouTube: NIST Overview","Artigo: Normas de segurança da informação","ISO 27001 oficial"], facul:"Segurança Cibernética (aulas 1–2) + Governança Corporativa — Risco e Compliance (aulas 1–2)" },
+  { n:6, phase:2, date:"01/06 – 06/06", tema:"Gestão de Riscos + IAM + LGPD", cyber:["CVE e CVSS: leitura e classificação","IAM: MFA, SSO, RBAC na prática","Threat modeling básico","LGPD e GDPR: princípios e diferenças"], resources:["Site CVSS — NIST NVD","IBM: O que é gerenciamento de vulnerabilidades?","YouTube: ENTENDA O QUE É LGPD","Alura: O que é IAM?"], facul:"Segurança Cibernética (aulas 3–4) + Governança Corporativa (aulas 3–4)" },
+  { n:7, phase:2, date:"08/06 – 13/06", tema:"Criptografia + Autenticação + Quebra de Senhas", cyber:["Criptografia simétrica x assimétrica","Hashing: MD5, SHA, bcrypt","PKI e certificados digitais","Quebra de senhas: Hashcat, brute force, rainbow tables"], resources:["Alura: Criptografia — diferenças","YouTube: Criptografia Assimétrica","Artigo: Hashcat 101 (Medium)","YouTube: Demonstração de Ataque Brute Force"], facul:"Segurança Cibernética (aulas 5–6, finalizar) + Governança Corporativa (aula 5, finalizar)" },
+  { n:8, phase:2, date:"15/06 – 20/06", tema:"Firewalls + IDS + IPS", cyber:["Firewall: regras, filtragem de tráfego","IDS (passivo) vs IPS (ativo)","iptables e UFW na prática","pfSense: configuração básica"], resources:["Artigo: UFW — Descomplicando o Firewall","YouTube: Firewall com Iptables: Teoria e Prática","Site pfSense","YouTube: iptables Complete Guide"], facul:"Gerenciamento de Projetos (aulas 3–5)" },
+  { n:9, phase:3, date:"22/06 – 27/06", tema:"OSINT + Técnicas Hacker + Reconhecimento", cyber:["OSINT: Shodan, theHarvester, Google Dorks","Maltego: mapeamento de alvos","Metodologias: PTES, OWASP, OSSTMM","Etapas de reconhecimento (pre-attack)"], resources:["Site: OSINT Framework","Site: haveibeenpwned.com","YouTube: O que é OSINT?","YouTube: Maltego — ferramenta poderosa"], facul:"Gerenciamento de Projetos (aulas 6–7)" },
+  { n:10, phase:3, date:"29/06 – 04/07", tema:"Web Application: Segurança + OWASP Top 10", cyber:["SQLi, XSS, IDOR, SSRF, XXE na prática","Broken Authentication e exposição de dados","DVWA: ambiente vulnerável controlado","Nessus e OpenVAS: análise de vulnerabilidades"], resources:["Site OWASP Top Ten","Artigo: SQL Injection — DVWA Solution","YouTube: DVWA Playlist — CryptoCat","Site Nessus (Tenable) · Site Qualys"], facul:"Gerenciamento de Projetos (aulas 8–9, finalizar)" },
+  { n:11, phase:3, date:"06/07 – 11/07", tema:"SOC + SIEM + SOAR", cyber:["Estrutura SOC: Tier 1, 2 e 3","Elastic SIEM e Wazuh (hands-on)","SOAR: orquestração e automação de resposta","Análise de logs: Windows Event Logs, Syslog"], resources:["Artigo: SIEM e SOC para iniciantes","YouTube: Construindo um SOC","YouTube: Como configurar o SIEM Wazuh","Site ELK Stack"], facul:"Revisão geral + fechamento de atividades pendentes" },
+  { n:12, phase:3, date:"13/07 – 18/07", tema:"Hardening + Endpoint Security + Metasploit", cyber:["Hardening Linux e Windows: CIS Benchmarks","Endpoint Security: EDR, EPP, XDR","Metasploit no contexto Blue Team","Análise de backdoors com MSFVENOM (conceitual)"], resources:["Artigo: Como fazer Hardening no Linux","YouTube: How to protect Linux from Hackers","Artigo: EPP vs EDR vs XDR","Site Metasploit"], facul:"Projetos e atividades pendentes da faculdade" },
+  { n:13, phase:3, date:"20/07 – 25/07", tema:"Forense Digital: Memória + Rede", cyber:["Cadeia de custódia digital","Volatility: análise de memória","Wireshark: forense de rede","FTK Imager e Autopsy na prática"], resources:["YouTube: DFIRScience — Digital Investigation Methods","Artigo: Memory Analysis For Beginners with Volatility","YouTube: Intro to Memory Forensics with Volatility 3","DFIR.training"], facul:"Buffer para reforço de qualquer disciplina com dificuldade" },
+  { n:14, phase:3, date:"27/07 – 01/08", tema:"Cloud Security + Forense na Nuvem + Contêineres", cyber:["Shared Responsibility Model","Misconfigurações comuns em cloud","Análise forense em ambientes cloud","Segurança de contêineres Docker"], resources:["Artigo: Security IN vs OF the Cloud","Artigo: Cloud Forensics Tools","YouTube: IBM — Container Security Explained","YouTube: HackerSploit — Docker Security"], facul:"Buffer livre para faculdade ou adiantamento de conteúdo" },
+  { n:15, phase:4, date:"03/08 – 08/08", tema:"Threat Hunting + Análise de Malware + PowerShell", cyber:["Threat Hunting: busca proativa de ameaças","Análise de malware estática e dinâmica (sandbox)","YARA: identificação de padrões","PowerShell para detecção e segurança"], resources:["Artigo: Threat Hunting — The Basics","YouTube: Threat Hunting Process","Artigo: Malware Analysis 101 — Static Analysis","YouTube: Papo Binário — AMO playlist"], facul:"Foco total em cybersec — faculdade apenas se urgente" },
+  { n:16, phase:4, date:"10/08 – 15/08", tema:"Zero Trust + Arquitetura de Rede + Resposta a Incidentes", cyber:["Zero Trust: NIST SP 800-207","Arquitetura de segurança de rede: design seguro","Gerenciamento de Resposta a Incidentes: 6 fases","Plano de resposta e análise pós-incidente"], resources:["Artigo: NIST Zero Trust Architecture (PDF)","YouTube: Descomplicando Zero Trust","YouTube: The Six Phases of Incident Response","Artigo: Incident Response Plan for Startups"], facul:"Foco total em cybersec — faculdade apenas se urgente" },
+  { n:17, phase:4, date:"17/08 – 22/08", tema:"AppSec + MDM + DevSecOps", cyber:["Segurança de aplicações: SAST e DAST","Web Application Security: melhores práticas","MDM: gestão de dispositivos móveis","Segurança contínua e automação (DevSecOps)"], resources:["YouTube: Application Security 101 (Snyk)","YouTube: SAST / DAST","Artigo: What is MDM?","Artigo: Continuous Security — DevSecOps"], facul:"Foco total em cybersec — faculdade apenas se urgente" },
+  { n:18, phase:4, date:"24/08 – 28/08", tema:"Projeto Final + Revisão + CompTIA Security+", cyber:["Relatório completo de incidente simulado","Revisão geral de todos os tópicos TechGuide","Simulados CompTIA Security+ SY0-701","Planejamento de carreira Blue Team + PRF"], resources:["ExamCompass — simulados gratuitos","Professor Messer — Security+ SY0-701","CompTIA.org","TryHackMe: SOC Simulator"], facul:"Todas as disciplinas devem estar concluídas" }
+];
+
+const disciplinas = [
+  { name:"Arquitetura de Computadores", progress:17, semanas:"Semanas 1–3", color:"#3b82f6", align:"Complementa diretamente o Linux — entender o hardware ajuda a compreender permissões, processos e memória no SO.", dicas:["Continue da aula 4 (Representação de Dados) na Sem 1","Termine as 9 aulas até o final da Sem 3","Use o sábado para fechar os exercícios pendentes"] },
+  { name:"Entrega e Suporte em TI", progress:0, semanas:"Semanas 2–4", color:"#00d4aa", align:"Cobre suporte técnico e gestão de chamados — habilidades essenciais para SOC e Blue Team.", dicas:["Inicie na Sem 2 (tarde: 16:00–17:00)","6 aulas distribuídas pelas semanas 2, 3 e 4","Conclua até o final da Sem 4"] },
+  { name:"Segurança Cibernética", progress:0, semanas:"Semanas 5–7", color:"#7c6df7", align:"Alinhamento perfeito com a Fase 2 do cybersec. O conteúdo da faculdade reforça CIA Triad, frameworks e riscos.", dicas:["Inicie na Sem 5 junto com CIA Triad — mesmo conteúdo","6 aulas nas semanas 5, 6 e 7","A disciplina parecerá fácil — você já viu no TechGuide"] },
+  { name:"Governança, Risco e Compliance", progress:0, semanas:"Semanas 5–7", color:"#f59e0b", align:"Complementa LGPD, ISO 27001 e gestão de riscos. Base direta para PRF (compliance e Dir. Administrativo).", dicas:["Estude em paralelo com Segurança Cibernética","5 aulas nas semanas 5, 6 e 7","Conecta com Dir. Administrativo da PRF"] },
+  { name:"Gerenciamento de Projetos", progress:6, semanas:"Semanas 4–10", color:"#ef4444", align:"Habilidade transversal. Gerenciar incidentes, comunicar riscos e coordenar respostas são aplicações diretas.", dicas:["9 aulas: 1–2 por semana entre as sems 4 e 10","Use as tardes de 16:00–17:00 para avançar","Conclua até a Sem 10 para liberar foco na Fase 3"] }
+];
+
+const levels = [
+  { label:"Nível 1", color:"#3b82f6", bg:"rgba(59,130,246,0.08)", groups:[ { name:"Base técnica", items:["Linha de comando — Fundamentos","Python — Fundamentos","Criptografia — Fundamentos"] }, { name:"Fundamentos de segurança", items:["Framework de Cibersegurança (NIST, ISO)","CIA Triad","Gestão de risco, ameaças e vulnerabilidades","IAM — Gerenciamento de Identidade e Acesso","Proteção de dados (LGPD/GDPR)","Conscientização de Segurança","Segurança em autenticação e senhas"] }, { name:"Blue Team base", items:["Firewalls, IDS e IPS","Análise de Vulnerabilidades","OSINT","SOC — Centro de Operações de Segurança","Investigação Digital — Fundamentos","Quebra de senhas","Penetration Testing — Fundamentos","Técnicas Hacker"] } ] },
+  { label:"Nível 2", color:"#00d4aa", bg:"rgba(0,212,170,0.06)", groups:[ { name:"Defesa avançada", items:["Segurança de Endpoint (EDR, EPP, XDR)","Hardening de Servidores","SIEM e SOAR","Web Application — Segurança","Web Application — Vulnerabilidade"] }, { name:"Forense", items:["Análise Forense de Memória","Análise Forense de Rede","Análise Forense na Nuvem","Recuperação de Dados"] }, { name:"Ferramentas e plataformas", items:["Metasploit — Ataque e Análise","Gerenciamento de Dispositivos Móveis (MDM)","Scripts PowerShell para segurança","Segurança de Contêineres"] } ] },
+  { label:"Nível 3", color:"#f59e0b", bg:"rgba(245,158,11,0.06)", groups:[ { name:"Arquitetura", items:["Arquitetura de Segurança de Rede","Arquitetura Zero Trust","Segurança de Aplicações de Software"] }, { name:"Operações avançadas", items:["Threat Hunting","Gerenciamento de Resposta a Incidentes","Análise de Malware","Segurança na Nuvem","Segurança Contínua — Automação e Monitoramento","Segurança física"] } ] },
+  { label:"Habilidades Auxiliares", color:"#94a3b8", bg:"rgba(148,163,184,0.05)", groups:[ { name:"Base tecnológica", items:["Linux — Fundamentos","Redes de Computadores — Fundamentos","HTTP — Fundamentos","Cloud — Fundamentos"] } ] }
+];
+
+const phaseClass = { 1:"phase-1", 2:"phase-2", 3:"phase-3", 4:"phase-4" };
+const phaseLabel = { 1:"Fase 1", 2:"Fase 2", 3:"Fase 3", 4:"Fase 4" };
+
+// ── PROGRESSO ──────────────────────────────────────────
+function getDone() { return JSON.parse(localStorage.getItem('weeks-done') || '{}'); }
+function toggleDone(e, n) {
+  e.stopPropagation();
+  const d = getDone(); d[n] = e.target.checked;
+  localStorage.setItem('weeks-done', JSON.stringify(d));
+  e.target.closest('.week-card').classList.toggle('completed', e.target.checked);
+  updateProgress();
+}
+function updateProgress() {
+  const d = getDone(), c = Object.values(d).filter(Boolean).length;
+  document.getElementById('progress-fill').style.width = (c/18*100)+'%';
+  document.getElementById('nav-logo').textContent = c > 0 ? `// cybersec ${c}/18 · concursos 2026` : '// cybersec + concursos · 2026';
+}
+
+// ── SEMANA ATUAL CYBERSEC ──────────────────────────────
+function getCurrentWeek() {
+  const s = new Date('2026-04-27'), diff = Math.floor((new Date()-s)/864e5);
+  return Math.min(Math.max(Math.floor(diff/7)+1,1),18);
+}
+function scrollToCurrentWeek() {
+  const card = document.querySelector(`.week-card[data-week="${getCurrentWeek()}"]`);
+  if (card) { card.scrollIntoView({behavior:'smooth',block:'center'}); card.classList.add('open'); }
+}
+
+// ── RENDER CONCURSO WEEKS ──────────────────────────────
+function renderConcWeeks(filter) {
+  const grid = document.getElementById('conc-grid');
+  grid.innerHTML = '';
+  const list = filter === 'all' ? concWeeks : concWeeks.filter(w => w.tag === filter);
+  list.forEach(w => {
+    const tagClass = w.tag === 'esa' ? 'phase-esa' : 'phase-bb';
+    const tagLabel = w.tag === 'esa' ? '● ESA' : '● BB/PRF base';
+    const card = document.createElement('div');
+    card.className = 'conc-card';
+    const topicsHtml = w.topics.map(t => `<div class="conc-topic">${t}</div>`).join('');
+    const resHtml = w.resources.map(r => `<div class="conc-resource">${r}</div>`).join('');
+    card.innerHTML = `
+      <div class="conc-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="conc-num">sem ${String(w.n).padStart(2,'0')}</div>
+        <div>
+          <div class="conc-title">${w.tema}</div>
+          <span class="phase-conc ${tagClass}" style="margin-top:3px;display:inline-flex;">${tagLabel}</span>
+        </div>
+        <div class="conc-date">${w.date}</div>
+        <svg class="conc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="conc-body">
+        <div><div class="conc-col-title">tópicos concurso</div>${topicsHtml}</div>
+        <div><div class="conc-col-title">recursos</div>${resHtml}</div>
+        <div class="cyber-block">
+          <span class="cyber-tag">cybersec paralelo · 30min manhã + 45min noite</span>
+          <div class="cyber-text">${w.cyber}</div>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+function filterConc(f, btn) {
+  document.querySelectorAll('.conc-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderConcWeeks(f);
+}
+
+// ── RENDER CYBERSEC WEEKS ──────────────────────────────
+function renderWeeks(filter) {
+  const grid = document.getElementById('weeks-grid');
+  grid.innerHTML = '';
+  const done = getDone(), cur = getCurrentWeek();
+  const list = filter === 'all' ? weeks : weeks.filter(w => w.phase == filter);
+  list.forEach(w => {
+    const isDone = done[w.n]||false, isCurrent = w.n===cur;
+    const card = document.createElement('div');
+    card.className = 'week-card'+(isCurrent?' current-week':'')+(isDone?' completed':'');
+    card.dataset.week = w.n; card.dataset.phase = w.phase;
+    const topicsHtml = w.cyber.map(t=>`<div class="week-topic">${t}</div>`).join('');
+    const resHtml = w.resources.map(r=>`<div class="week-resource">${r}</div>`).join('');
+    const curBadge = isCurrent ? `<div class="current-badge">▶ você está aqui</div>` : '';
+    card.innerHTML = `
+      <div class="week-header" onclick="toggleWeek(this.parentElement)">
+        <input type="checkbox" class="week-check" ${isDone?'checked':''} onclick="toggleDone(event,${w.n})">
+        <div class="week-num-label">sem ${String(w.n).padStart(2,'0')}</div>
+        <div>${curBadge}<div class="week-title-label">${w.tema}</div>
+          <span class="phase-pill ${phaseClass[w.phase]}" style="margin-top:3px;display:inline-flex;">● ${phaseLabel[w.phase]}</span></div>
+        <div class="week-date-label">${w.date}</div>
+        <svg class="week-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="week-body">
+        <div><div class="week-col-title">tópicos cybersec</div>${topicsHtml}</div>
+        <div><div class="week-col-title">recursos</div>${resHtml}</div>
+        <div class="facul-block"><span class="facul-tag">faculdade · 16:00–17:00 + sáb</span><div class="facul-text">${w.facul}</div></div>
+      </div>`;
+    grid.appendChild(card);
+  });
+  applySearch(document.getElementById('search-input').value);
+}
+function toggleWeek(card) { card.classList.toggle('open'); }
+function filterWeeks(phase, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); renderWeeks(phase);
+}
+
+// ── BUSCA ──────────────────────────────────────────────
+function searchWeeks(q) { applySearch(q); }
+function applySearch(query) {
+  const q = query.trim().toLowerCase(); let vis = 0;
+  document.querySelectorAll('.week-card').forEach(card => {
+    const match = !q || card.textContent.toLowerCase().includes(q);
+    card.style.display = match ? '' : 'none'; if(match) vis++;
+  });
+  const nr = document.getElementById('no-result');
+  if(!q||vis>0){nr.style.display='none';}
+  else{nr.style.display='block';nr.textContent=`nenhum resultado para "${query}"`;}
+}
+
+// ── TIMER ──────────────────────────────────────────────
+const activeTimers = new Map();
+function startTimer(btn, minutes) {
+  if (activeTimers.has(btn)) {
+    clearInterval(activeTimers.get(btn)); activeTimers.delete(btn);
+    btn.className='timer-btn'; btn.textContent=`▶ iniciar · ${minutes>=60?minutes/60+'h':minutes+'min'}`;
+    return;
+  }
+  let sec = minutes*60; btn.classList.add('running');
+  const iv = setInterval(()=>{
+    sec--;
+    const m=Math.floor(sec/60),s=sec%60;
+    btn.textContent=`⏱ ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}  (clique p/ parar)`;
+    if(sec<=0){
+      clearInterval(iv); activeTimers.delete(btn);
+      btn.className='timer-btn done'; btn.textContent='✓ sessão concluída!';
+      if(Notification.permission==='granted') new Notification('Sessão concluída! 🎯',{body:'Hora do próximo bloco.'});
+      setTimeout(()=>{btn.className='timer-btn';btn.textContent=`▶ iniciar · ${minutes>=60?minutes/60+'h':minutes+'min'}`;},5000);
+    }
+  },1000);
+  activeTimers.set(btn,iv); Notification.requestPermission();
+}
+
+// ── RENDER DISCIPLINAS ─────────────────────────────────
+function renderDisc() {
+  const grid = document.getElementById('disc-grid');
+  disciplinas.forEach(d => {
+    const dicasHtml = d.dicas.map(t=>`<div class="disc-dica">${t}</div>`).join('');
+    const card = document.createElement('div'); card.className='disc-card';
+    card.innerHTML=`
+      <div class="disc-header-bar">
+        <div class="disc-name" style="color:${d.color};">${d.name}</div>
+        <div class="disc-meta">${d.semanas} · ${d.progress}% concluído</div>
+        <div class="progress-bar-bg"><div class="progress-bar" style="width:${d.progress}%;background:${d.color};"></div></div>
+      </div>
+      <div class="disc-body">
+        <div class="disc-align">${d.align}</div>
+        <div class="week-col-title" style="margin-bottom:5px;">como encaixar</div>${dicasHtml}
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+// ── RENDER LEVELS ──────────────────────────────────────
+function renderLevels() {
+  const wrap = document.getElementById('levels-wrap');
+  levels.forEach(lv => {
+    const total = lv.groups.reduce((a,g)=>a+g.items.length,0);
+    const gh = lv.groups.map(g=>`<div class="level-group"><div class="level-group-name">${g.name}</div>${g.items.map(it=>`<div class="level-topic" style="--c:${lv.color}"><style>.level-topic::before{color:${lv.color}}</style>${it}</div>`).join('')}</div>`).join('');
+    const block = document.createElement('div'); block.className='level-block';
+    block.innerHTML=`
+      <div class="level-header-bar" style="background:${lv.bg};">
+        <span class="level-num" style="background:${lv.color}22;color:${lv.color};">${lv.label}</span>
+        <span class="level-name">${lv.label==='Habilidades Auxiliares'?'Fundamentos transversais':'Trilha de evolução'}</span>
+        <span class="level-count">${total} tópicos</span>
+      </div><div class="level-topics">${gh}</div>`;
+    wrap.appendChild(block);
+  });
+}
+
+// ── DAY TABS ───────────────────────────────────────────
+function showDay(day) {
+  ['semana','sabado','domingo'].forEach(d=>{
+    const el=document.getElementById('day-'+d);
+    el.style.display=d===day?'flex':'none';
+    if(d===day) el.style.flexDirection='column';
+  });
+  document.querySelectorAll('.day-tab').forEach((b,i)=>b.classList.toggle('active',['semana','sabado','domingo'][i]===day));
+}
+
+// ── OBSERVERS ──────────────────────────────────────────
+const io = new IntersectionObserver(entries=>entries.forEach((e,i)=>{if(e.isIntersecting)setTimeout(()=>e.target.classList.add('visible'),i*80);}),{threshold:0.05});
+document.querySelectorAll('.fade-in').forEach(el=>io.observe(el));
+
+const barObs = new IntersectionObserver(entries=>entries.forEach(e=>{
+  if(e.isIntersecting){
+    e.target.querySelectorAll('.progress-bar').forEach(b=>{const w=b.style.width;b.style.width='0';setTimeout(()=>b.style.width=w,150);});
+    barObs.unobserve(e.target);
+  }
+}),{threshold:0.2});
+
+// ── INIT ───────────────────────────────────────────────
+document.getElementById('day-semana').style.cssText='display:flex;flex-direction:column';
+renderConcWeeks('all');
+renderWeeks('all');
+renderDisc();
+renderLevels();
+updateProgress();
+document.querySelectorAll('.disc-grid').forEach(el=>barObs.observe(el));
+</script>
+</body>
+</html>
