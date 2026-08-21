@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cybersec · Study Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+ 
+<nav>
+  <div class="nav-logo">// cybersec · study tracker</div>
+  <div class="nav-right">
+    <div class="nav-progress" id="nav-progress"><span>0</span>/18 semanas</div>
+    <button class="reset-btn" onclick="resetProgress()">↺ zerar</button>
+  </div>
+</nav>
+<div id="progress-bar"><div id="progress-fill"></div></div>
+ 
+<div class="hero">
+  <div class="hero-tag">Blue Team · Cybersecurity · 2026</div>
+  <h1>Cybersec<br><span>Study Tracker</span></h1>
+  <p class="hero-sub">Marque as semanas concluídas e acompanhe seu progresso nas 18 semanas de estudo em Cybersegurança Blue Team.</p>
+  <div class="stats-grid">
+    <div class="stat"><div class="stat-val" id="stat-done">0</div><div class="stat-label">Concluídas</div></div>
+    <div class="stat"><div class="stat-val" id="stat-remaining">18</div><div class="stat-label">Restantes</div></div>
+    <div class="stat"><div class="stat-val">4</div><div class="stat-label">Fases</div></div>
+    <div class="stat"><div class="stat-val">ago/26</div><div class="stat-label">Meta</div></div>
+  </div>
+</div>
+ 
+<div class="main">
+  <div class="section-header fade-in">
+    <span class="section-title">trilha de estudos</span>
+    <div class="section-line"></div>
+  </div>
+ 
+  <div class="phase-legend fade-in">
+    <span class="phase-pill phase-1" onclick="filterPhase(1,this)">● Fase 1 — Base técnica</span>
+    <span class="phase-pill phase-2" onclick="filterPhase(2,this)">● Fase 2 — Segurança base</span>
+    <span class="phase-pill phase-3" onclick="filterPhase(3,this)">● Fase 3 — Blue Team</span>
+    <span class="phase-pill phase-4" onclick="filterPhase(4,this)">● Fase 4 — Avançado</span>
+  </div>
+ 
+  <div class="search-wrap fade-in">
+    <span class="search-icon">⌕</span>
+    <input class="search-input" id="search-input" type="text" placeholder="buscar tópico ou ferramenta..." oninput="applySearch(this.value)">
+  </div>
+ 
+  <div class="weeks-grid fade-in" id="weeks-grid"></div>
+  <div class="no-result" id="no-result" style="display:none;">nenhum resultado encontrado</div>
+</div>
+ 
+<footer><span>// cybersec blue team</span> · 18 semanas · ago/26</footer>
+ 
+<script src="script.js"></script>
+
+</body>
+</html>
+ 
+
+
+
+
+
+
